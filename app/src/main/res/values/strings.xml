@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Vk Dialogs</string>
     <string name="title_dialogs">Список бесед</string>
+    <string name="dialogs_login">Логин</string>
 </resources>
