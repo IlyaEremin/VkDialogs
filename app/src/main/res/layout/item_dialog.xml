@@ -6,34 +6,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
+    <!--<ImageView-->
+        <!--android:id="@+id/image"-->
+        <!--android:layout_width="64dp"-->
+        <!--android:layout_height="64dp"-->
+        <!--/>-->
 
-
-    <ImageView
+    <ru.ilyaeremin.vkdialogs.CircleImageView
         android:id="@+id/image"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        />
-
-    <ImageView
-        android:id="@+id/image1"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginLeft="32dp"
-        />
-
-    <ImageView
-        android:id="@+id/image2"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="32dp"
-        />
-
-    <ImageView
-        android:id="@+id/image3"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginLeft="32dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         />
 
     <TextView

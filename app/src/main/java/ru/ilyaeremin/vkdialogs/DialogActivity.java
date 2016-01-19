@@ -36,8 +36,8 @@ public class DialogActivity extends AppCompatActivity {
         add(new Dialog("First dialog", "This is last message", "20:40", new long[]{1, 2, 3, 4}));
         add(new Dialog("Second dialog", "Very long long long long long long long long long long long long", "20:30",
             new long[]{1, 2, 3, 4, 6}));
-        add(new Dialog("Third dialog", "This is last message", "20:20", new long[]{1, 2, 3, 4, 5}));
-        add(new Dialog("First dialog", "This is last message", "20:10", new long[]{1, 2, 3, 4, 5, 6}));
+        add(new Dialog("Third dialog", "This is last message", "20:20", new long[]{1, 2, 3}));
+        add(new Dialog("First dialog", "This is last message", "20:10", new long[]{1, 2}));
         add(new Dialog("First dialog", "This is last message", "20:10", new long[]{1, 2, 3, 4, 5, 6}));
         add(new Dialog("First dialog", "This is last message", "20:10", new long[]{1, 2, 3, 4, 5, 6}));
         add(new Dialog("First dialog", "This is last message", "20:10", new long[]{1, 2, 3, 4, 5, 6}));

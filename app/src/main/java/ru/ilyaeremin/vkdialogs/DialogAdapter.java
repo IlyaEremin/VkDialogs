@@ -1,18 +1,21 @@
 package ru.ilyaeremin.vkdialogs;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.util.List;
 import java.util.Map;
 
 import ru.ilyaeremin.vkdialogs.models.Dialog;
+import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.Randoms;
 import ru.ilyaeremin.vkdialogs.utils.Views;
 
@@ -21,8 +24,8 @@ import ru.ilyaeremin.vkdialogs.utils.Views;
  */
 public class DialogAdapter extends RecyclerView.Adapter {
 
-    private final List<Dialog> items;
-    private Map<Long, String> avatars;
+    private final List<Dialog>      items;
+    private       Map<Long, String> avatars;
 
     public DialogAdapter(List<Dialog> items) {
         this.items = items;
@@ -33,16 +36,16 @@ public class DialogAdapter extends RecyclerView.Adapter {
     }
 
     @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((DialogHolder)holder).draw(items.get(position));
+        ((DialogHolder) holder).draw(items.get(position));
         ((DialogHolder) holder).drawAvatars(grabAvatarsFor(position));
     }
 
     private String[] grabAvatarsFor(int position) {
         Dialog dialog = this.items.get(position);
         int avatarCount = Math.min(4, items.get(position).getUserIds().length);
-        String[] usersPhotoUrls = new String[4];
+        String[] usersPhotoUrls = new String[avatarCount];
         int[] randoms = Randoms.getNRandomNumberWithinRange(avatarCount, items.get(position).getUserIds().length);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < avatarCount; i++) {
             usersPhotoUrls[i] = avatars.get(dialog.getUserIds()[randoms[i]]);
         }
         return usersPhotoUrls;
@@ -62,20 +65,16 @@ public class DialogAdapter extends RecyclerView.Adapter {
         private TextView  title;
         private TextView  time;
         private TextView  lastMessage;
-        private ImageView image1;
-        private ImageView image2;
-        private ImageView image3;
-        private ImageView image4;
+        private CircleImageView image;
 
         public DialogHolder(View itemView) {
             super(itemView);
             title = Views.findById(itemView, R.id.title);
             time = Views.findById(itemView, R.id.time);
             lastMessage = Views.findById(itemView, R.id.last_message);
-            image1 = Views.findById(itemView, R.id.image);
-            image2 = Views.findById(itemView, R.id.image1);
-            image3 = Views.findById(itemView, R.id.image2);
-            image4 = Views.findById(itemView, R.id.image3);
+            image = Views.findById(itemView, R.id.image);
+            multiDrawable = new MultiDrawable(itemView.getContext());
+            multiDrawable.setBounds(0, 0, AndroidUtils.dp(64), AndroidUtils.dp(64));
         }
 
         public void draw(Dialog dialog) {
@@ -84,18 +83,22 @@ public class DialogAdapter extends RecyclerView.Adapter {
             lastMessage.setText(dialog.getLastMessage());
         }
 
-        public void drawAvatars(String[] urls){
-            if (urls[0] != null) {
-                Glide.with(itemView.getContext()).load(urls[0]).into(image1);
-            }
-            if (urls[1] != null) {
-                Glide.with(itemView.getContext()).load(urls[1]).into(image2);
-            }
-            if (urls[2] != null) {
-                Glide.with(itemView.getContext()).load(urls[2]).into(image3);
-            }
-            if (urls[3] != null) {
-                Glide.with(itemView.getContext()).load(urls[3]).into(image4);
+        private MultiDrawable multiDrawable;
+
+        public void drawAvatars(String[] urls) {
+            int dp64 = AndroidUtils.dp(64);
+            multiDrawable.setSize(urls.length);
+
+            for (int i = 0; i < urls.length; i++) {
+                final int finalI = i;
+                Glide.with(itemView.getContext()).load(urls[i]).asBitmap()
+                    .into(new SimpleTarget<Bitmap>(dp64, dp64) {
+                        @Override
+                        public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                            multiDrawable.onDownloadFinished(finalI, bitmap);
+                            image.setImageDrawable(multiDrawable);
+                        }
+                    });
             }
         }
     }
