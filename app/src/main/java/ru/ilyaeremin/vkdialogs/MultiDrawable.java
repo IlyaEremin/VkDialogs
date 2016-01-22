@@ -8,9 +8,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 
 /**
@@ -19,24 +16,27 @@ import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 public class MultiDrawable extends Drawable {
 
     private final Context context;
-    private List<Drawable> mDrawables = new ArrayList<>();
+    private Drawable[] mDrawables = new Drawable[4];
+
     private int size;
 
     Drawable placeholder = new ColorDrawable(0xFFEEEEEE);
 
     public MultiDrawable(Context context) {
         this.context = context;
+        resetDrawables();
+    }
+
+    private void resetDrawables() {
         for (int i = 0; i < 4; i++) {
-            mDrawables.add(placeholder);
+            mDrawables[i] = placeholder;
         }
     }
 
     @Override
     public void draw(Canvas canvas) {
         if (size == 1) {
-            if (mDrawables.get(0) != null) {
-                mDrawables.get(0).draw(canvas);
-            }
+                mDrawables[0].draw(canvas);
             return;
         }
         int width = getBounds().width();
@@ -48,36 +48,27 @@ public class MultiDrawable extends Drawable {
         if (size == 2 || size == 3) {
             // Paint left half
             canvas.save();
-            canvas.clipRect(0, 0, width / 2 - AndroidUtils.dp(1), height - AndroidUtils.dp(1));
+            canvas.clipRect(0, 0, width / 2 - AndroidUtils.dp(1), height);
             canvas.translate(-width / 4, 0);
-            if (mDrawables.get(0) != null) {
-                mDrawables.get(0).draw(canvas);
-            }
+            mDrawables[0].draw(canvas);
             canvas.restore();
         }
         if (size == 2) {
             // Paint right half
-            canvas.save();
             canvas.clipRect(width / 2 + AndroidUtils.dp(1), 0, width, height);
             canvas.translate(width / 4, 0);
-            if (mDrawables.get(1) != null) {
-                mDrawables.get(1).draw(canvas);
-            }
+            mDrawables[1].draw(canvas);
             canvas.restore();
         } else {
             // Paint top right
             canvas.save();
             canvas.scale(.5f, .5f);
-            canvas.translate(width + AndroidUtils.dp(2), AndroidUtils.dp(2));
-            if (mDrawables.get(1) != null) {
-                mDrawables.get(1).draw(canvas);
-            }
+            canvas.translate(width + AndroidUtils.dp(2), -AndroidUtils.dp(4));
+            mDrawables[1].draw(canvas);
 
             // Paint bottom right
-            canvas.translate(AndroidUtils.dp(2), height + AndroidUtils.dp(2));
-            if (mDrawables.get(2) != null) {
-                mDrawables.get(2).draw(canvas);
-            }
+            canvas.translate(0, height + AndroidUtils.dp(4));
+            mDrawables[2].draw(canvas);
             canvas.restore();
         }
 
@@ -85,16 +76,12 @@ public class MultiDrawable extends Drawable {
             // Paint top left
             canvas.save();
             canvas.scale(.5f, .5f);
-            canvas.translate(-AndroidUtils.dp(2), -AndroidUtils.dp(2));
-            if (mDrawables.get(0) != null) {
-                mDrawables.get(0).draw(canvas);
-            }
+            canvas.translate(-AndroidUtils.dp(2), -AndroidUtils.dp(4));
+            mDrawables[0].draw(canvas);
 
             // Paint bottom left
-            canvas.translate(-AndroidUtils.dp(2), height + AndroidUtils.dp(2));
-            if (mDrawables.get(3) != null) {
-                mDrawables.get(3).draw(canvas);
-            }
+            canvas.translate(0, height + AndroidUtils.dp(4));
+            mDrawables[3].draw(canvas);
             canvas.restore();
         }
 
@@ -124,11 +111,13 @@ public class MultiDrawable extends Drawable {
 
     public void setSize(int size) {
         this.size = size;
+        resetDrawables();
     }
 
     public void onDownloadFinished(int position, Bitmap bitmap) {
         BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
         drawable.setBounds(0, 0, AndroidUtils.dp(64), AndroidUtils.dp(64));
-        mDrawables.add(position, drawable);
+
+        mDrawables[position] =  drawable;
     }
 }

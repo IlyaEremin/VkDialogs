@@ -13,7 +13,11 @@ import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
+import com.vk.sdk.api.model.VKApiGetDialogResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +38,10 @@ public class DialogActivity extends AppCompatActivity {
 
     private List<Dialog> dialogs = new ArrayList<Dialog>() {{
         add(new Dialog("First dialog", "This is last message", "20:40", new long[]{1, 2, 3, 4}));
+        add(new Dialog("First dialog", "This is last message", "20:40", new long[]{7, 7, 7, 7}));
+        add(new Dialog("First dialog", "This is last message", "20:40", new long[]{7, 7, 7}));
+        add(new Dialog("First dialog", "This is last message", "20:40", new long[]{7, 7}));
+        add(new Dialog("First dialog", "This is last message", "20:40", new long[]{7}));
         add(new Dialog("Second dialog", "Very long long long long long long long long long long long long", "20:30",
             new long[]{1, 2, 3, 4, 6}));
         add(new Dialog("Third dialog", "This is last message", "20:20", new long[]{1, 2, 3}));
@@ -61,6 +69,7 @@ public class DialogActivity extends AppCompatActivity {
         put(4l, "https://pp.vk.me/c622826/v622826715/36090/5YZvdo1TXOo.jpg");
         put(5l, "https://pp.vk.me/c625729/v625729333/45330/NL31RuLJ9Qo.jpg");
         put(6l, "https://pp.vk.me/c613525/v613525456/1789e/sGWkI6PbHUk.jpg");
+        put(7L, "http://demandware.edgesuite.net/aakn_prd/on/demandware.static/-/Sites-bdel/default/dw05008c96/swatches/black.png");
     }};
 
     @Override
@@ -96,23 +105,23 @@ public class DialogActivity extends AppCompatActivity {
         dialogsRv.setAdapter(adapter);
         adapter.avatarsRetrieved(avatars);
 
-//        progressBar.setVisibility(View.VISIBLE);
-//        VKRequest dialogRequests = VKApi.messages().getDialogs();
-//        dialogRequests.executeWithListener(new VKRequest.VKRequestListener() {
-//            @Override public void onComplete(VKResponse response) {
-//                hideProgress();
-//                VKApiGetDialogResponse model = (VKApiGetDialogResponse) response.parsedModel;
-//            }
-//
-//            @Override
-//            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
-//                super.attemptFailed(request, attemptNumber, totalAttempts);
-//            }
-//
-//            @Override public void onError(VKError error) {
-//                hideProgress();
-//            }
-//        });
+        progressBar.setVisibility(View.VISIBLE);
+        VKRequest dialogRequests = VKApi.messages().getDialogs();
+        dialogRequests.executeWithListener(new VKRequest.VKRequestListener() {
+            @Override public void onComplete(VKResponse response) {
+                hideProgress();
+                VKApiGetDialogResponse model = (VKApiGetDialogResponse) response.parsedModel;
+            }
+
+            @Override
+            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
+                super.attemptFailed(request, attemptNumber, totalAttempts);
+            }
+
+            @Override public void onError(VKError error) {
+                hideProgress();
+            }
+        });
     }
 
     private void hideProgress() {
