@@ -4,19 +4,19 @@ package ru.ilyaeremin.vkdialogs.models;
  * Created by Ilya Eremin on 18.01.2016.
  */
 public class User {
-    long id;
-    String photoUrl;
+    int uid;
+    String photo_50;
 
-    public User(long id, String photoUrl) {
-        this.id = id;
-        this.photoUrl = photoUrl;
+    public User(int id, String photo_50) {
+        this.uid = id;
+        this.photo_50 = photo_50;
     }
 
-    public long getId() {
-        return id;
+    public int getUid() {
+        return uid;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
+    public String getPhoto_50() {
+        return photo_50;
     }
 }
