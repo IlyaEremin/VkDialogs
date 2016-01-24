@@ -13,7 +13,7 @@ import ru.ilyaeremin.vkdialogs.App;
 public class AndroidUtils {
 
     public static        float                       density       = 1;
-    public static        int                         leftBaseline  = 72;
+    public static        int                         leftBaseline  = 88;
     private static final Hashtable<String, Typeface> typefaceCache = new Hashtable<>();
 
     static {
