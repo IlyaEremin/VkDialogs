@@ -2,10 +2,8 @@ package ru.ilyaeremin.vkdialogs;
 
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -15,9 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import ru.ilyaeremin.vkdialogs.models.Dialog;
-import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
-import ru.ilyaeremin.vkdialogs.utils.Randoms;
-import ru.ilyaeremin.vkdialogs.utils.Views;
 
 /**
  * Created by Ilya Eremin on 17.01.2016.
@@ -26,80 +21,88 @@ public class DialogAdapter extends RecyclerView.Adapter {
 
     private final List<Dialog>      items;
     private       Map<Long, String> avatars;
+    private OnLoadMoreListener listener;
+
+    public void setOnLoadMoreListener(OnLoadMoreListener listener){
+        this.listener = listener;
+    }
 
     public DialogAdapter(List<Dialog> items) {
         this.items = items;
     }
 
     @Override public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new DialogHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_dialog, parent, false));
+        if (viewType == 0) {
+            return new DialogHolder(new DialogView(parent.getContext()));
+        } else {
+            return new ProgressHolder(new ProgressView(parent.getContext()));
+        }
     }
 
     @Override public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ((DialogHolder) holder).draw(items.get(position));
-        ((DialogHolder) holder).drawAvatars(grabAvatarsFor(position));
-    }
-
-    private String[] grabAvatarsFor(int position) {
-        Dialog dialog = this.items.get(position);
-        int avatarCount = Math.min(4, items.get(position).getUserIds().length);
-        String[] usersPhotoUrls = new String[avatarCount];
-        int[] randoms = Randoms.getNRandomNumberWithinRange(avatarCount, items.get(position).getUserIds().length);
-        for (int i = 0; i < avatarCount; i++) {
-            usersPhotoUrls[i] = avatars.get(dialog.getUserIds()[randoms[i]]);
+        if (holder instanceof DialogHolder) {
+            ((DialogHolder) holder).draw(items.get(position));
         }
-        return usersPhotoUrls;
+        if (!DialogManager.isEndReached && position > items.size() - 2 && listener != null && !DialogManager.loading) {
+            listener.onLoadMore();
+        }
     }
 
-    public void avatarsRetrieved(Map<Long, String> avatars) {
-        this.avatars = avatars;
-        notifyDataSetChanged();
+    public int getRawItemCount(){
+        return items.size();
+    }
+
+    @Override public int getItemViewType(int position) {
+        if (position == items.size()) {
+            return 1;
+        }
+        return 0;
     }
 
     @Override public int getItemCount() {
-        return items.size();
+        int count = items.size();
+        if (count == 0 && DialogManager.loading) {
+            return 0;
+        }
+        if (!DialogManager.isEndReached) {
+            count++;
+        }
+        return count;
+    }
+
+    public void updateItems(List<Dialog> chats) {
+        this.items.addAll(chats);
+        notifyDataSetChanged();
     }
 
     private static class DialogHolder extends RecyclerView.ViewHolder {
 
-        private TextView  title;
-        private TextView  time;
-        private TextView  lastMessage;
-        private CircleImageView image;
-
         public DialogHolder(View itemView) {
             super(itemView);
-            title = Views.findById(itemView, R.id.title);
-            time = Views.findById(itemView, R.id.time);
-            lastMessage = Views.findById(itemView, R.id.last_message);
-            image = Views.findById(itemView, R.id.image);
-            multiDrawable = new MultiDrawable(itemView.getContext());
-            multiDrawable.setBounds(0, 0, AndroidUtils.dp(64), AndroidUtils.dp(64));
         }
 
         public void draw(Dialog dialog) {
-            title.setText(dialog.getTitle());
-            time.setText(dialog.getTimeOfLastImage());
-            lastMessage.setText(dialog.getLastMessage());
-        }
-
-        private MultiDrawable multiDrawable;
-
-        public void drawAvatars(String[] urls) {
-            int dp64 = AndroidUtils.dp(64);
-            multiDrawable.setSize(urls.length);
-
-            for (int i = 0; i < urls.length; i++) {
+            final DialogView dialogView = (DialogView) itemView;
+            dialogView.setDialog(dialog);
+            String[] chatPhotoUrl = dialog.getChatPhotoUrl();
+            dialogView.updateAvatarsCount(chatPhotoUrl.length);
+            for (int i = 0; i < chatPhotoUrl.length; i++) {
                 final int finalI = i;
-                Glide.with(itemView.getContext()).load(urls[i]).asBitmap()
-                    .into(new SimpleTarget<Bitmap>(dp64, dp64) {
+                Glide.with(this.itemView.getContext()).load(chatPhotoUrl[i]).asBitmap()
+                    .into(new SimpleTarget<Bitmap>(AvatarDrawable.width, AvatarDrawable.height) {
                         @Override
                         public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                            multiDrawable.onDownloadFinished(finalI, bitmap);
-                            image.setImageDrawable(multiDrawable);
+                            (dialogView).updateImage(bitmap, finalI);
                         }
                     });
             }
+        }
+
+    }
+
+    private class ProgressHolder extends RecyclerView.ViewHolder {
+        public ProgressHolder(View view) {
+            super(view);
         }
     }
 }
