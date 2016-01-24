@@ -2,6 +2,7 @@ package ru.ilyaeremin.vkdialogs;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Handler;
 
 import com.vk.sdk.VKSdk;
 
@@ -10,12 +11,14 @@ import com.vk.sdk.VKSdk;
  */
 public class App extends Application {
 
-    public static Context applicationContext;
+    public static          Context applicationContext;
+    public static volatile Handler applicationHandler;
 
     @Override public void onCreate() {
         super.onCreate();
         applicationContext = this;
         VKSdk.initialize(this);
+        applicationHandler = new Handler(applicationContext.getMainLooper());
     }
 
 }
