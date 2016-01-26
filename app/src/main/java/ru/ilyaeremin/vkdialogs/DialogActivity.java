@@ -11,39 +11,33 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
-import com.vk.sdk.api.VKParameters;
-import com.vk.sdk.api.VKRequest;
-import com.vk.sdk.api.VKResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import ru.ilyaeremin.vkdialogs.models.Dialog;
-import ru.ilyaeremin.vkdialogs.models.Users;
-import ru.ilyaeremin.vkdialogs.models.VkChatResponse;
+import de.greenrobot.event.EventBus;
+import ru.ilyaeremin.vkdialogs.models.Chat;
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.Views;
 
 public class DialogActivity extends AppCompatActivity implements OnLoadMoreListener {
 
-    private static final int MAX_DIALOG_COUNT = 200;
+    private static final String KEY_DIALOGS   = "dialogs";
+
     private ProgressBar  progressBar;
     private RecyclerView dialogsRv;
     private View         loginBtn;
 
-    private Gson gson;
-
     private DialogAdapter adapter;
-    private int offset;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
         setContentView(R.layout.activity_dialog);
         progressBar = Views.findById(this, R.id.progress);
         progressBar.getIndeterminateDrawable().setColorFilter(0xFF3F5D81, PorterDuff.Mode.MULTIPLY);
@@ -59,77 +53,78 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
                 }
             }
         });
-        if (!VKSdk.isLoggedIn()) {
-            Views.gone(dialogsRv);
-            VKSdk.login(DialogActivity.this, VKScope.MESSAGES);
+
+        if (savedState != null) {
+            ArrayList<Chat> chats = savedState.getParcelableArrayList(KEY_DIALOGS);
+            if (chats != null) {
+                createAndSetAdapter(chats);
+            } else {
+                if (DialogManager.loading) {
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            }
         } else {
-            Views.gone(loginBtn, dialogsRv);
-            fetchDialogs(0);
-        }
-    }
-
-    private synchronized Gson getParser(){
-        if (gson == null) {
-            gson = new Gson();
-        }
-        return gson;
-    }
-
-    private void fetchDialogs(final int offset) {
-        if (offset == 0) {
-            showProgress();
-        }
-        VKRequest chatRequest = new VKRequest("execute.getChats", VKParameters.from("offset", String.valueOf(offset)));
-        DialogManager.loading = true;
-
-        chatRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override public void onComplete(VKResponse response) {
-                DialogManager.loading = false;
-                hideProgress();
-                dialogsRv.setVisibility(View.VISIBLE);
-                // TODO parse in background
-                String json = response.responseString.replaceFirst("\"dialogs\":\\[\\d*,", "\"dialogs\": [");
-                VkChatResponse chatResponse = getParser().fromJson(json, VkChatResponse.class);
-                if (chatResponse.getDialogs().size() < MAX_DIALOG_COUNT) {
-                    DialogManager.isEndReached = true;
+            if (!VKSdk.isLoggedIn()) {
+                VKSdk.login(DialogActivity.this, VKScope.MESSAGES);
+            } else {
+                if (DialogManager.loading) {
+                    progressBar.setVisibility(View.VISIBLE);
                 } else {
-                    DialogActivity.this.offset += chatResponse.getDialogs().size();
-                }
-                Users.getInstance().populate(chatResponse.getProfiles());
-                List<Dialog> chats = chatResponse.getChats();
-                if (offset == 0) {
-                    adapter = new DialogAdapter(chats);
-                    adapter.setOnLoadMoreListener(DialogActivity.this);
-                    dialogsRv.setAdapter(adapter);
-                } else {
-                    adapter.updateItems(chats);
+                    fetchDialogs();
                 }
             }
-
-            @Override
-            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
-                super.attemptFailed(request, attemptNumber, totalAttempts);
-            }
-
-            @Override public void onError(VKError error) {
-                hideProgress();
-            }
-        });
+        }
+        EventBus.getDefault().registerSticky(this);
     }
 
-    private void showProgress() {
-        progressBar.setVisibility(View.VISIBLE);
+    private void createAndSetAdapter(List<Chat> chats) {
+        adapter = new DialogAdapter(chats);
+        dialogsRv.setAdapter(adapter);
+        adapter.setOnLoadMoreListener(DialogActivity.this);
+        Views.gone(loginBtn, progressBar);
+        dialogsRv.setVisibility(View.VISIBLE);
     }
 
-    private void hideProgress() {
-        progressBar.setVisibility(View.GONE);
+    public void onEvent(OnLoadFinished event){
+        if (event.code == Code.SUCCESS) {
+            onLoadFinished(event.getChats());
+        } else {
+            if (adapter == null) {
+                showRetryButton();
+            }
+        }
+        EventBus.getDefault().removeStickyEvent(OnLoadFinished.class);
+    }
+
+    private void showRetryButton() {
+        Toast.makeText(this, "error while loading", Toast.LENGTH_LONG).show();
+    }
+
+    private void onLoadFinished(List<Chat> chats) {
+        if (adapter == null) {
+            createAndSetAdapter(chats);
+        } else {
+            adapter.updateItems(chats);
+        }
+    }
+
+    private void fetchDialogs() {
+        if (adapter == null) { progressBar.setVisibility(View.VISIBLE) }
+        DialogManager.loadDialogs();
+    }
+
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (adapter != null) {
+            outState.putParcelableArrayList(KEY_DIALOGS, (ArrayList)adapter.getItems());
+        }
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
             public void onResult(VKAccessToken res) {
-                fetchDialogs(0);
+                fetchDialogs();
             }
 
             @Override
@@ -145,6 +140,11 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
     }
 
     @Override public void onLoadMore() {
-        fetchDialogs(offset);
+        fetchDialogs();
+    }
+
+    @Override protected void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
     }
 }
