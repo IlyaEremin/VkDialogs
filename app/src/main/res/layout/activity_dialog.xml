@@ -7,6 +7,15 @@
     tools:context=".DialogActivity"
     >
 
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="@dimen/toolbar_height" />
+
+
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
@@ -14,13 +23,16 @@
         android:visibility="gone"
         android:layout_gravity="center"
         android:indeterminate="true"
+        tools:visibility="visible"
         />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/toolbar_height"
         android:visibility="gone"
+        tools:visibility="visible"
         />
 
     <Button
@@ -30,6 +42,7 @@
         android:text="@string/dialogs_login"
         android:visibility="gone"
         android:layout_gravity="center"
+        tools:visibility="visible"
         />
 
 </FrameLayout>

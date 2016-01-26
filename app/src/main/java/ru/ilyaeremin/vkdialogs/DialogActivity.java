@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -27,11 +28,12 @@ import ru.ilyaeremin.vkdialogs.utils.Views;
 
 public class DialogActivity extends AppCompatActivity implements OnLoadMoreListener {
 
-    private static final String KEY_DIALOGS   = "dialogs";
+    private static final String KEY_DIALOGS = "dialogs";
 
     private ProgressBar  progressBar;
     private RecyclerView dialogsRv;
     private View         loginBtn;
+    private Toolbar      toolbar;
 
     private DialogAdapter adapter;
 
@@ -43,6 +45,9 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         progressBar.getIndeterminateDrawable().setColorFilter(0xFF3F5D81, PorterDuff.Mode.MULTIPLY);
         dialogsRv = Views.findById(this, R.id.rv);
         loginBtn = Views.findById(this, R.id.login_button);
+        toolbar = Views.findById(this, R.id.toolbar);
+        toolbar.setTitleTextAppearance(this, R.style.ToolbarTextApperarance);
+        setSupportActionBar(toolbar);
 
         dialogsRv.setLayoutManager(new LinearLayoutManager(this));
         dialogsRv.addItemDecoration(new RecyclerView.ItemDecoration() {
@@ -90,7 +95,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         dialogsRv.setVisibility(View.VISIBLE);
     }
 
-    public void onEvent(OnLoadFinished event){
+    public void onEvent(OnLoadFinished event) {
         if (event.code == Code.SUCCESS) {
             onLoadFinished(event.getDialogs());
         } else {
@@ -123,7 +128,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
     @Override protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (adapter != null) {
-            outState.putParcelableArrayList(KEY_DIALOGS, (ArrayList)adapter.getItems());
+            outState.putParcelableArrayList(KEY_DIALOGS, (ArrayList) adapter.getItems());
         }
     }
 

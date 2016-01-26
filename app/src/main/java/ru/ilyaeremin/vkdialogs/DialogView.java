@@ -26,14 +26,14 @@ public class DialogView extends View {
     private static TextPaint timePaint;
 
     private int chatNameLeft;
-    private int chatNameTop = AndroidUtils.dp(20);
+    private int chatNameTop = AndroidUtils.dp(14);
     private StaticLayout chatNameLayout;
 
-    private int timeTop = AndroidUtils.dp(20);
+    private int timeTop = AndroidUtils.dp(16);
     private int          timeLeft;
     private StaticLayout timeLayout;
 
-    private int messageTop = AndroidUtils.dp(40);
+    private int messageTop = AndroidUtils.dp(38);
     private int          messageLeft;
     private StaticLayout messageLayout;
 
@@ -59,6 +59,9 @@ public class DialogView extends View {
 
         avatar = new AvatarDrawable();
         setBackgroundResource(R.drawable.list_selector);
+        setClickable(true);
+        setFocusable(true);
+        setFocusableInTouchMode(true);
     }
 
     public void setDialog(Dialog dialog) {
@@ -99,7 +102,6 @@ public class DialogView extends View {
 
         TextPaint currentNamePaint = namePaint;
         TextPaint currentMessagePaint = messagePaint;
-        boolean checkMessage = true;
 
         chatNameLeft = AndroidUtils.dp(AndroidUtils.leftBaseline);
         timeString = dialog.getDate();
@@ -130,16 +132,15 @@ public class DialogView extends View {
             avatar.setTop(AndroidUtils.dp(9));
         }
 
-        if (checkMessage) {
-            if (messageString == null) {
-                messageString = "";
-            }
-            String mess = messageString.toString();
-            if (mess.length() > 150) {
-                mess = mess.substring(0, 150);
-            }
-            messageString = mess.replace("\n", " ");
+        if (messageString == null) {
+            messageString = "";
         }
+        String mess = messageString.toString();
+        if (mess.length() > 150) {
+            mess = mess.substring(0, 150);
+        }
+        messageString = mess.replace("\n", " ");
+
         messageWidth = Math.max(AndroidUtils.dp(12), messageWidth);
         CharSequence messageStringFinal = TextUtils.ellipsize(messageString, currentMessagePaint, messageWidth - AndroidUtils.dp(12), TextUtils.TruncateAt.END);
         try {
