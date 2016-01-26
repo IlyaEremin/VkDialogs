@@ -5,18 +5,18 @@ package ru.ilyaeremin.vkdialogs.models;
  */
 public class User {
     int uid;
-    String photo_50;
+    String photo_100;
 
-    public User(int id, String photo_50) {
+    public User(int id, String photo_100) {
         this.uid = id;
-        this.photo_50 = photo_50;
+        this.photo_100 = photo_100;
     }
 
     public int getUid() {
         return uid;
     }
 
-    public String getPhoto_50() {
-        return photo_50;
+    public String getPhoto() {
+        return photo_100;
     }
 }
