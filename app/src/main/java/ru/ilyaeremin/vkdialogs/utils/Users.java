@@ -1,10 +1,10 @@
-package ru.ilyaeremin.vkdialogs.models;
+package ru.ilyaeremin.vkdialogs.utils;
 
 import android.util.SparseArray;
 
 import java.util.List;
 
-import ru.ilyaeremin.vkdialogs.utils.Dates;
+import ru.ilyaeremin.vkdialogs.models.User;
 
 /**
  * Created by Ilya Eremin on 24.01.2016.
@@ -35,7 +35,7 @@ public class Users {
 
     public void populate(List<User> users){
         for (User user : users) {
-            idToUserpic.put(user.getUid(), user.photo_50);
+            idToUserpic.put(user.getUid(), user.getPhoto());
         }
     }
 

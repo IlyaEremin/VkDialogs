@@ -3,7 +3,6 @@ package ru.ilyaeremin.vkdialogs;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.os.Build;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -13,7 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import ru.ilyaeremin.vkdialogs.models.Chat;
+import ru.ilyaeremin.vkdialogs.models.Dialog;
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.DLogger;
 
@@ -26,65 +25,45 @@ public class DialogView extends View {
     private static TextPaint messagePaint;
     private static TextPaint timePaint;
 
-    private static Paint backPaint;
+    private int chatNameLeft;
+    private int chatNameTop = AndroidUtils.dp(20);
+    private StaticLayout chatNameLayout;
 
-    private int          nameLeft;
-    private StaticLayout nameLayout;
-    private boolean      drawNameGroup;
-
-    private int timeLeft;
-    private int timeTop = AndroidUtils.dp(18);
+    private int timeTop = AndroidUtils.dp(20);
+    private int          timeLeft;
     private StaticLayout timeLayout;
 
     private int messageTop = AndroidUtils.dp(40);
     private int          messageLeft;
     private StaticLayout messageLayout;
 
-    private Chat           chat;
+    private Dialog         dialog;
     private AvatarDrawable avatar;
-    private boolean        isSelected;
 
     public DialogView(Context context) {
         super(context);
 
-        if (namePaint == null) {
-            namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            namePaint.setTextSize(AndroidUtils.dp(17));
-            namePaint.setColor(0xff212121);
-            namePaint.setTypeface(AndroidUtils.getTypeface("fonts/rmedium.ttf"));
+        namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+        namePaint.setTextSize(AndroidUtils.dp(17));
+        namePaint.setColor(0xff212121);
+        namePaint.setTypeface(AndroidUtils.getTypeface("fonts/rmedium.ttf"));
 
-            messagePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            messagePaint.setTextSize(AndroidUtils.dp(16));
-            messagePaint.setColor(0xff8f8f8f);
-            messagePaint.linkColor = 0xff8f8f8f;
+        messagePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+        messagePaint.setTextSize(AndroidUtils.dp(15));
+        messagePaint.setColor(0xff8a8a8a);
+        messagePaint.linkColor = 0xff8a8a8a;
 
-            backPaint = new Paint();
-            backPaint.setColor(0x0f000000);
+        timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+        timePaint.setTextSize(AndroidUtils.dp(14));
+        timePaint.setColor(0xffa6a6a6);
 
-            timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-            timePaint.setTextSize(AndroidUtils.dp(13));
-            timePaint.setColor(0xff999999);
-
-        }
         avatar = new AvatarDrawable();
         setBackgroundResource(R.drawable.list_selector);
     }
 
-    public void setChat(Chat chat) {
-        this.chat = chat;
-        update(0);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-//        avatarImage.onDetachedFromWindow();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-//        avatarImage.onAttachedToWindow();
+    public void setDialog(Dialog dialog) {
+        this.dialog = dialog;
+        update();
     }
 
     @Override
@@ -94,7 +73,7 @@ public class DialogView extends View {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (chat == null) {
+        if (dialog == null) {
             super.onLayout(changed, left, top, right, bottom);
             return;
         }
@@ -114,32 +93,32 @@ public class DialogView extends View {
     }
 
     public void buildLayout() {
-        String nameString = "";
+        String chatNameString = "";
         String timeString = "";
         CharSequence messageString = "";
+
         TextPaint currentNamePaint = namePaint;
         TextPaint currentMessagePaint = messagePaint;
         boolean checkMessage = true;
 
-        drawNameGroup = true;
-        nameLeft = AndroidUtils.dp(AndroidUtils.leftBaseline);
-        timeString = chat.getDate();
-        if (chat != null) {
-            messageString = chat.getBody();
+        chatNameLeft = AndroidUtils.dp(AndroidUtils.leftBaseline);
+        timeString = dialog.getDate();
+        if (dialog != null) {
+            messageString = dialog.getBody();
         }
 
         int timeWidth = (int) Math.ceil(timePaint.measureText(timeString));
         timeLayout = new StaticLayout(timeString, timePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         timeLeft = getMeasuredWidth() - AndroidUtils.dp(15) - timeWidth;
 
-        nameString = chat.getTitle();
+        chatNameString = dialog.getTitle();
 
-        int nameWidth = getMeasuredWidth() - nameLeft - AndroidUtils.dp(14) - timeWidth;
+        int nameWidth = getMeasuredWidth() - chatNameLeft - AndroidUtils.dp(14) - timeWidth;
 
         nameWidth = Math.max(AndroidUtils.dp(12), nameWidth);
-        CharSequence nameStringFinal = TextUtils.ellipsize(nameString.replace("\n", " "), currentNamePaint, nameWidth - AndroidUtils.dp(12), TextUtils.TruncateAt.END);
+        CharSequence nameStringFinal = TextUtils.ellipsize(chatNameString.replace("\n", " "), currentNamePaint, nameWidth - AndroidUtils.dp(12), TextUtils.TruncateAt.END);
         try {
-            nameLayout = new StaticLayout(nameStringFinal, currentNamePaint, nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+            chatNameLayout = new StaticLayout(nameStringFinal, currentNamePaint, nameWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         } catch (Exception e) {
             Log.e("tmessages", "", e);
         }
@@ -171,12 +150,12 @@ public class DialogView extends View {
 
         double widthpx;
         float left;
-        if (nameLayout != null && nameLayout.getLineCount() > 0) {
-            left = nameLayout.getLineRight(0);
+        if (chatNameLayout != null && chatNameLayout.getLineCount() > 0) {
+            left = chatNameLayout.getLineRight(0);
             if (left == nameWidth) {
-                widthpx = Math.ceil(nameLayout.getLineWidth(0));
+                widthpx = Math.ceil(chatNameLayout.getLineWidth(0));
                 if (widthpx < nameWidth) {
-                    nameLeft -= (nameWidth - widthpx);
+                    chatNameLeft -= (nameWidth - widthpx);
                 }
             }
         }
@@ -191,44 +170,36 @@ public class DialogView extends View {
         }
     }
 
-    public void update(int mask) {
+    public void update() {
         if (getMeasuredWidth() != 0 || getMeasuredHeight() != 0) {
             buildLayout();
         } else {
             requestLayout();
         }
-
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (chat == null) {
+        if (dialog == null) {
             return;
         }
 
-        if (isSelected) {
-            canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), backPaint);
-        }
-
-        if (nameLayout != null) {
-            canvas.save();
-            canvas.translate(nameLeft, AndroidUtils.dp(13));
-            nameLayout.draw(canvas);
-            canvas.restore();
-        }
+        canvas.save();
+        canvas.translate(chatNameLeft, chatNameTop);
+        chatNameLayout.draw(canvas);
+        canvas.restore();
 
         canvas.save();
         canvas.translate(timeLeft, timeTop);
         timeLayout.draw(canvas);
         canvas.restore();
 
-        if (messageLayout != null) {
-            canvas.save();
-            canvas.translate(messageLeft, messageTop);
-            messageLayout.draw(canvas);
-            canvas.restore();
-        }
+        canvas.save();
+        canvas.translate(messageLeft, messageTop);
+        messageLayout.draw(canvas);
+        canvas.restore();
+
         if (avatar != null) {
             avatar.draw(canvas);
         }
