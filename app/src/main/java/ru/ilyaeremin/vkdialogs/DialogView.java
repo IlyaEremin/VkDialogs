@@ -13,7 +13,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import ru.ilyaeremin.vkdialogs.models.Dialog;
+import ru.ilyaeremin.vkdialogs.models.Chat;
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.DLogger;
 
@@ -40,9 +40,9 @@ public class DialogView extends View {
     private int          messageLeft;
     private StaticLayout messageLayout;
 
-    private Dialog         dialog;
+    private Chat           chat;
     private AvatarDrawable avatar;
-    private boolean isSelected;
+    private boolean        isSelected;
 
     public DialogView(Context context) {
         super(context);
@@ -70,8 +70,8 @@ public class DialogView extends View {
         setBackgroundResource(R.drawable.list_selector);
     }
 
-    public void setDialog(Dialog dialog) {
-        this.dialog = dialog;
+    public void setChat(Chat chat) {
+        this.chat = chat;
         update(0);
     }
 
@@ -94,7 +94,7 @@ public class DialogView extends View {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (dialog == null) {
+        if (chat == null) {
             super.onLayout(changed, left, top, right, bottom);
             return;
         }
@@ -123,16 +123,16 @@ public class DialogView extends View {
 
         drawNameGroup = true;
         nameLeft = AndroidUtils.dp(AndroidUtils.leftBaseline);
-        timeString = dialog.getDate();
-        if (dialog != null) {
-            messageString = dialog.getBody();
+        timeString = chat.getDate();
+        if (chat != null) {
+            messageString = chat.getBody();
         }
 
         int timeWidth = (int) Math.ceil(timePaint.measureText(timeString));
         timeLayout = new StaticLayout(timeString, timePaint, timeWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
         timeLeft = getMeasuredWidth() - AndroidUtils.dp(15) - timeWidth;
 
-        nameString = dialog.getTitle();
+        nameString = chat.getTitle();
 
         int nameWidth = getMeasuredWidth() - nameLeft - AndroidUtils.dp(14) - timeWidth;
 
@@ -203,7 +203,7 @@ public class DialogView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (dialog == null) {
+        if (chat == null) {
             return;
         }
 

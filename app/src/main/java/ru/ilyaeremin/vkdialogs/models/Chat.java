@@ -1,5 +1,7 @@
 package ru.ilyaeremin.vkdialogs.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import ru.ilyaeremin.vkdialogs.utils.Dates;
@@ -7,7 +9,7 @@ import ru.ilyaeremin.vkdialogs.utils.Dates;
 /**
  * Created by Ilya Eremin on 18.01.2016.
  */
-public class Dialog {
+public class Chat implements Parcelable {
     String   title;
     String   body;
     int      date;
@@ -21,7 +23,7 @@ public class Dialog {
         return userPics;
     }
 
-    public Dialog(String title, String body, int timeOfLastImage, long[] userIds) {
+    public Chat(String title, String body, int timeOfLastImage, long[] userIds) {
         this.title = title;
         this.body = body;
         this.date = timeOfLastImage;
@@ -64,4 +66,41 @@ public class Dialog {
     public boolean isDeleted() {
         return users_count == 0;
     }
+
+
+    @Override public int describeContents() {
+        return 0;
+    }
+
+    @Override public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.title);
+        dest.writeString(this.body);
+        dest.writeInt(this.date);
+        dest.writeStringArray(this.userPics);
+        dest.writeString(this.photo_100);
+        dest.writeString(this.chat_active);
+        dest.writeInt(this.chat_id);
+        dest.writeInt(this.users_count);
+    }
+
+    protected Chat(Parcel in) {
+        this.title = in.readString();
+        this.body = in.readString();
+        this.date = in.readInt();
+        this.userPics = in.createStringArray();
+        this.photo_100 = in.readString();
+        this.chat_active = in.readString();
+        this.chat_id = in.readInt();
+        this.users_count = in.readInt();
+    }
+
+    public static final Parcelable.Creator<Chat> CREATOR = new Parcelable.Creator<Chat>() {
+        public Chat createFromParcel(Parcel source) {
+            return new Chat(source);
+        }
+
+        public Chat[] newArray(int size) {
+            return new Chat[size];
+        }
+    };
 }

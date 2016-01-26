@@ -12,22 +12,22 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import java.util.List;
 import java.util.Map;
 
-import ru.ilyaeremin.vkdialogs.models.Dialog;
+import ru.ilyaeremin.vkdialogs.models.Chat;
 
 /**
  * Created by Ilya Eremin on 17.01.2016.
  */
 public class DialogAdapter extends RecyclerView.Adapter {
 
-    private final List<Dialog>      items;
-    private       Map<Long, String> avatars;
-    private OnLoadMoreListener listener;
+    private final List<Chat>         items;
+    private       Map<Long, String>  avatars;
+    private       OnLoadMoreListener listener;
 
-    public void setOnLoadMoreListener(OnLoadMoreListener listener){
+    public void setOnLoadMoreListener(OnLoadMoreListener listener) {
         this.listener = listener;
     }
 
-    public DialogAdapter(List<Dialog> items) {
+    public DialogAdapter(List<Chat> items) {
         this.items = items;
     }
 
@@ -48,10 +48,6 @@ public class DialogAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public int getRawItemCount(){
-        return items.size();
-    }
-
     @Override public int getItemViewType(int position) {
         if (position == items.size()) {
             return 1;
@@ -70,7 +66,7 @@ public class DialogAdapter extends RecyclerView.Adapter {
         return count;
     }
 
-    public void updateItems(List<Dialog> chats) {
+    public void updateItems(List<Chat> chats) {
         this.items.addAll(chats);
         notifyDataSetChanged();
     }
@@ -81,10 +77,10 @@ public class DialogAdapter extends RecyclerView.Adapter {
             super(itemView);
         }
 
-        public void draw(Dialog dialog) {
+        public void draw(Chat chat) {
             final DialogView dialogView = (DialogView) itemView;
-            dialogView.setDialog(dialog);
-            String[] chatPhotoUrl = dialog.getChatPhotoUrl();
+            dialogView.setChat(chat);
+            String[] chatPhotoUrl = chat.getChatPhotoUrl();
             dialogView.updateAvatarsCount(chatPhotoUrl.length);
             for (int i = 0; i < chatPhotoUrl.length; i++) {
                 final int finalI = i;
@@ -104,5 +100,9 @@ public class DialogAdapter extends RecyclerView.Adapter {
         public ProgressHolder(View view) {
             super(view);
         }
+    }
+
+    public List<Chat> getItems(){
+        return items;
     }
 }
