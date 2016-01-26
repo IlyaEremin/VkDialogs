@@ -7,8 +7,9 @@ import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 
 import de.greenrobot.event.EventBus;
-import ru.ilyaeremin.vkdialogs.models.Users;
+import ru.ilyaeremin.vkdialogs.utils.Users;
 import ru.ilyaeremin.vkdialogs.models.VkChatResponse;
+import ru.ilyaeremin.vkdialogs.utils.Threads;
 
 /**
  * Created by Ilya Eremin on 25.01.2016.
@@ -33,18 +34,26 @@ public class DialogManager {
         DialogManager.loading = true;
         VKRequest chatRequest = new VKRequest("execute.getChats", VKParameters.from("offset", String.valueOf(currentOffset)));
         chatRequest.executeWithListener(new VKRequest.VKRequestListener() {
-            @Override public void onComplete(VKResponse response) {
+            @Override public void onComplete(final VKResponse response) {
                 DialogManager.loading = false;
-                // TODO parse in background
-                String json = response.responseString.replaceFirst("\"dialogs\":\\[\\d*,", "\"dialogs\": [");
-                VkChatResponse chatResponse = getParser().fromJson(json, VkChatResponse.class);
-                if (chatResponse.getDialogs().size() < MAX_DIALOG_COUNT) {
-                    DialogManager.isEndReached = true;
-                } else {
-                    currentOffset += chatResponse.getDialogs().size();
-                }
-                Users.getInstance().populate(chatResponse.getProfiles());
-                EventBus.getDefault().postSticky(new OnLoadFinished(chatResponse.getChats()));
+
+                Threads.worker.postRunnable(new Runnable() {
+                    @Override public void run() {
+                        String json = response.responseString.replaceFirst("\"dialogs\":\\[\\d*,", "\"dialogs\": [");
+                        final VkChatResponse chatResponse = getParser().fromJson(json, VkChatResponse.class);
+                        if (chatResponse.getDialogs().size() < MAX_DIALOG_COUNT) {
+                            DialogManager.isEndReached = true;
+                        } else {
+                            currentOffset += chatResponse.getDialogs().size();
+                        }
+                        Users.getInstance().populate(chatResponse.getProfiles());
+                        App.applicationHandler.post(new Runnable() {
+                            @Override public void run() {
+                                EventBus.getDefault().postSticky(new OnLoadFinished(chatResponse.getChats()));
+                            }
+                        });
+                    }
+                });
             }
 
             @Override
@@ -56,5 +65,10 @@ public class DialogManager {
                 EventBus.getDefault().postSticky(new OnLoadFinished(Code.FAIL));
             }
         });
+    }
+
+    public static void resetState() {
+        currentOffset = 0;
+        isEndReached = false;
     }
 }
