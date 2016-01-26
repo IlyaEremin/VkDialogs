@@ -12,14 +12,14 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import java.util.List;
 import java.util.Map;
 
-import ru.ilyaeremin.vkdialogs.models.Chat;
+import ru.ilyaeremin.vkdialogs.models.Dialog;
 
 /**
  * Created by Ilya Eremin on 17.01.2016.
  */
 public class DialogAdapter extends RecyclerView.Adapter {
 
-    private final List<Chat>         items;
+    private final List<Dialog>       items;
     private       Map<Long, String>  avatars;
     private       OnLoadMoreListener listener;
 
@@ -27,7 +27,7 @@ public class DialogAdapter extends RecyclerView.Adapter {
         this.listener = listener;
     }
 
-    public DialogAdapter(List<Chat> items) {
+    public DialogAdapter(List<Dialog> items) {
         this.items = items;
     }
 
@@ -66,31 +66,38 @@ public class DialogAdapter extends RecyclerView.Adapter {
         return count;
     }
 
-    public void updateItems(List<Chat> chats) {
-        this.items.addAll(chats);
+    public void updateItems(List<Dialog> dialogs) {
+        this.items.addAll(dialogs);
         notifyDataSetChanged();
     }
 
     private static class DialogHolder extends RecyclerView.ViewHolder {
 
-        public DialogHolder(View itemView) {
+        private SimpleTarget[] targets;
+
+        public DialogHolder(final View itemView) {
             super(itemView);
+            targets = new SimpleTarget[4];
+            for (int i = 0; i < 4; i++) {
+                final int finalI = i;
+                targets[i] = new SimpleTarget<Bitmap>(AvatarDrawable.width, AvatarDrawable.height) {
+                    @Override
+                    public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+                        ((DialogView) itemView).updateImage(bitmap, finalI);
+                    }
+                };
+            }
         }
 
-        public void draw(Chat chat) {
+        @SuppressWarnings("unchecked") public void draw(Dialog dialog) {
             final DialogView dialogView = (DialogView) itemView;
-            dialogView.setChat(chat);
-            String[] chatPhotoUrl = chat.getChatPhotoUrl();
+            dialogView.setDialog(dialog);
+            String[] chatPhotoUrl = dialog.getChatPhotoUrl();
             dialogView.updateAvatarsCount(chatPhotoUrl.length);
             for (int i = 0; i < chatPhotoUrl.length; i++) {
-                final int finalI = i;
-                Glide.with(this.itemView.getContext()).load(chatPhotoUrl[i]).asBitmap()
-                    .into(new SimpleTarget<Bitmap>(AvatarDrawable.width, AvatarDrawable.height) {
-                        @Override
-                        public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                            (dialogView).updateImage(bitmap, finalI);
-                        }
-                    });
+                Glide
+                    .with(this.itemView.getContext()).load(chatPhotoUrl[i]).asBitmap()
+                    .into((SimpleTarget<Bitmap>)targets[i]);
             }
         }
 
@@ -102,7 +109,7 @@ public class DialogAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public List<Chat> getItems(){
+    public List<Dialog> getItems(){
         return items;
     }
 }
