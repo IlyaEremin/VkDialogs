@@ -9,7 +9,7 @@ import ru.ilyaeremin.vkdialogs.utils.Dates;
 /**
  * Created by Ilya Eremin on 18.01.2016.
  */
-public class Chat implements Parcelable {
+public class Dialog implements Parcelable {
     String   title;
     String   body;
     int      date;
@@ -23,7 +23,7 @@ public class Chat implements Parcelable {
         return userPics;
     }
 
-    public Chat(String title, String body, int timeOfLastImage, long[] userIds) {
+    public Dialog(String title, String body, int timeOfLastImage, long[] userIds) {
         this.title = title;
         this.body = body;
         this.date = timeOfLastImage;
@@ -83,7 +83,7 @@ public class Chat implements Parcelable {
         dest.writeInt(this.users_count);
     }
 
-    protected Chat(Parcel in) {
+    protected Dialog(Parcel in) {
         this.title = in.readString();
         this.body = in.readString();
         this.date = in.readInt();
@@ -94,13 +94,13 @@ public class Chat implements Parcelable {
         this.users_count = in.readInt();
     }
 
-    public static final Parcelable.Creator<Chat> CREATOR = new Parcelable.Creator<Chat>() {
-        public Chat createFromParcel(Parcel source) {
-            return new Chat(source);
+    public static final Parcelable.Creator<Dialog> CREATOR = new Parcelable.Creator<Dialog>() {
+        public Dialog createFromParcel(Parcel source) {
+            return new Dialog(source);
         }
 
-        public Chat[] newArray(int size) {
-            return new Chat[size];
+        public Dialog[] newArray(int size) {
+            return new Dialog[size];
         }
     };
 }

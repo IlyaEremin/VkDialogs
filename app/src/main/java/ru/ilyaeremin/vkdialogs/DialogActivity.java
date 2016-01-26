@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import ru.ilyaeremin.vkdialogs.models.Chat;
+import ru.ilyaeremin.vkdialogs.models.Dialog;
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.Views;
 
@@ -55,15 +55,9 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         });
 
         if (savedState != null) {
-            ArrayList<Chat> chats = savedState.getParcelableArrayList(KEY_DIALOGS);
-            if (chats != null) {
-                createAndSetAdapter(chats);
-            } else {
-                if (DialogManager.loading) {
-                    progressBar.setVisibility(View.VISIBLE);
-                }
-            }
+            restoreState(savedState);
         } else {
+            DialogManager.resetState();
             if (!VKSdk.isLoggedIn()) {
                 VKSdk.login(DialogActivity.this, VKScope.MESSAGES);
             } else {
@@ -77,8 +71,19 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         EventBus.getDefault().registerSticky(this);
     }
 
-    private void createAndSetAdapter(List<Chat> chats) {
-        adapter = new DialogAdapter(chats);
+    private void restoreState(Bundle savedState) {
+        ArrayList<Dialog> dialogs = savedState.getParcelableArrayList(KEY_DIALOGS);
+        if (dialogs != null) {
+            createAndSetAdapter(dialogs);
+        } else {
+            if (DialogManager.loading) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void createAndSetAdapter(List<Dialog> dialogs) {
+        adapter = new DialogAdapter(dialogs);
         dialogsRv.setAdapter(adapter);
         adapter.setOnLoadMoreListener(DialogActivity.this);
         Views.gone(loginBtn, progressBar);
@@ -87,7 +92,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
 
     public void onEvent(OnLoadFinished event){
         if (event.code == Code.SUCCESS) {
-            onLoadFinished(event.getChats());
+            onLoadFinished(event.getDialogs());
         } else {
             if (adapter == null) {
                 showRetryButton();
@@ -100,16 +105,18 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         Toast.makeText(this, "error while loading", Toast.LENGTH_LONG).show();
     }
 
-    private void onLoadFinished(List<Chat> chats) {
+    private void onLoadFinished(List<Dialog> dialogs) {
         if (adapter == null) {
-            createAndSetAdapter(chats);
+            createAndSetAdapter(dialogs);
         } else {
-            adapter.updateItems(chats);
+            adapter.updateItems(dialogs);
         }
     }
 
     private void fetchDialogs() {
-        if (adapter == null) { progressBar.setVisibility(View.VISIBLE) }
+        if (adapter == null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
         DialogManager.loadDialogs();
     }
 

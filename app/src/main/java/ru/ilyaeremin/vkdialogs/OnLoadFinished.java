@@ -2,26 +2,26 @@ package ru.ilyaeremin.vkdialogs;
 
 import java.util.List;
 
-import ru.ilyaeremin.vkdialogs.models.Chat;
+import ru.ilyaeremin.vkdialogs.models.Dialog;
 
 /**
  * Created by Ilya Eremin on 26.01.2016.
  */
 public class OnLoadFinished {
-    private final List<Chat> chats;
-    public final Code code;
+    private final List<Dialog> dialogs;
+    public final Code          code;
 
-    public OnLoadFinished(List<Chat> chats) {
-        this.chats = chats;
+    public OnLoadFinished(List<Dialog> dialogs) {
+        this.dialogs = dialogs;
         this.code = Code.SUCCESS;
     }
 
     public OnLoadFinished(Code code) {
         this.code = code;
-        this.chats = null;
+        this.dialogs = null;
     }
 
-    public List<Chat> getChats() {
-        return chats;
+    public List<Dialog> getDialogs() {
+        return dialogs;
     }
 }
