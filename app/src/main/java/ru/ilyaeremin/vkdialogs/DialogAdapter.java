@@ -1,6 +1,7 @@
 package ru.ilyaeremin.vkdialogs;
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,18 +11,19 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.util.List;
-import java.util.Map;
 
 import ru.ilyaeremin.vkdialogs.models.Dialog;
+import ru.ilyaeremin.vkdialogs.views.AvatarDrawable;
+import ru.ilyaeremin.vkdialogs.views.DialogView;
+import ru.ilyaeremin.vkdialogs.views.ProgressView;
 
 /**
  * Created by Ilya Eremin on 17.01.2016.
  */
 public class DialogAdapter extends RecyclerView.Adapter {
 
-    private final List<Dialog>       items;
-    private       Map<Long, String>  avatars;
-    private       OnLoadMoreListener listener;
+    private final     List<Dialog>       items;
+    @Nullable private OnLoadMoreListener listener;
 
     public void setOnLoadMoreListener(OnLoadMoreListener listener) {
         this.listener = listener;
@@ -43,7 +45,7 @@ public class DialogAdapter extends RecyclerView.Adapter {
         if (holder instanceof DialogHolder) {
             ((DialogHolder) holder).draw(items.get(position));
         }
-        if (!DialogManager.isEndReached && position > items.size() - 2 && listener != null && !DialogManager.loading) {
+        if (!DialogManager.getInstance().isEndReached && position > items.size() - 2 && listener != null && !DialogManager.getInstance().loading) {
             listener.onLoadMore();
         }
     }
@@ -57,10 +59,10 @@ public class DialogAdapter extends RecyclerView.Adapter {
 
     @Override public int getItemCount() {
         int count = items.size();
-        if (count == 0 && DialogManager.loading) {
+        if (count == 0 && DialogManager.getInstance().loading) {
             return 0;
         }
-        if (!DialogManager.isEndReached) {
+        if (!DialogManager.getInstance().isEndReached) {
             count++;
         }
         return count;
@@ -97,7 +99,7 @@ public class DialogAdapter extends RecyclerView.Adapter {
             for (int i = 0; i < chatPhotoUrl.length; i++) {
                 Glide
                     .with(this.itemView.getContext()).load(chatPhotoUrl[i]).asBitmap()
-                    .into((SimpleTarget<Bitmap>)targets[i]);
+                    .into((SimpleTarget<Bitmap>) targets[i]);
             }
         }
 
@@ -109,7 +111,7 @@ public class DialogAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public List<Dialog> getItems(){
+    public List<Dialog> getItems() {
         return items;
     }
 }

@@ -12,7 +12,7 @@ import ru.ilyaeremin.vkdialogs.utils.Users;
 public class VkChatResponse {
     RootLevelResponse response;
 
-    private class RootLevelResponse {
+    private static class RootLevelResponse {
         List<User>   profiles;
         List<Dialog> dialogs;
     }

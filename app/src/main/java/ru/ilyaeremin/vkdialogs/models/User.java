@@ -7,6 +7,8 @@ public class User {
     int uid;
     String photo_100;
 
+    public User() {}
+
     public User(int id, String photo_100) {
         this.uid = id;
         this.photo_100 = photo_100;

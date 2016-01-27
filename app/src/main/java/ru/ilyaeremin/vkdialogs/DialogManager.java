@@ -7,6 +7,8 @@ import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 
 import de.greenrobot.event.EventBus;
+import ru.ilyaeremin.vkdialogs.models.Code;
+import ru.ilyaeremin.vkdialogs.utils.Dates;
 import ru.ilyaeremin.vkdialogs.utils.Users;
 import ru.ilyaeremin.vkdialogs.models.VkChatResponse;
 import ru.ilyaeremin.vkdialogs.utils.Threads;
@@ -16,8 +18,8 @@ import ru.ilyaeremin.vkdialogs.utils.Threads;
  */
 public class DialogManager {
     private static final int MAX_DIALOG_COUNT = 200;
-    public static  boolean loading;
-    public static  boolean isEndReached;
+    public boolean loading;
+    public boolean isEndReached;
     private static Gson    gson;
     private static int currentOffset = 0;
 
@@ -28,21 +30,36 @@ public class DialogManager {
         return gson;
     }
 
-    public static void loadDialogs() {
+    private static volatile DialogManager instance = null;
+
+    public static DialogManager getInstance(){
+        DialogManager localInstance = instance;
+        if (localInstance == null) {
+            synchronized (Dates.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new DialogManager();
+                }
+            }
+        }
+        return localInstance;
+    }
+
+    public void loadDialogs() {
         if (loading) throw new IllegalStateException("can't start second loading");
 
-        DialogManager.loading = true;
+        loading = true;
         VKRequest chatRequest = new VKRequest("execute.getChats", VKParameters.from("offset", String.valueOf(currentOffset)));
         chatRequest.executeWithListener(new VKRequest.VKRequestListener() {
             @Override public void onComplete(final VKResponse response) {
-                DialogManager.loading = false;
+                loading = false;
 
                 Threads.worker.postRunnable(new Runnable() {
                     @Override public void run() {
                         String json = response.responseString.replaceFirst("\"dialogs\":\\[\\d*,", "\"dialogs\": [");
                         final VkChatResponse chatResponse = getParser().fromJson(json, VkChatResponse.class);
                         if (chatResponse.getDialogs().size() < MAX_DIALOG_COUNT) {
-                            DialogManager.isEndReached = true;
+                            isEndReached = true;
                         } else {
                             currentOffset += chatResponse.getDialogs().size();
                         }
@@ -67,7 +84,7 @@ public class DialogManager {
         });
     }
 
-    public static void resetState() {
+    public void resetState() {
         currentOffset = 0;
         isEndReached = false;
     }

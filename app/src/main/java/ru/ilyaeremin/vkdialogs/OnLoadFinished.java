@@ -2,6 +2,7 @@ package ru.ilyaeremin.vkdialogs;
 
 import java.util.List;
 
+import ru.ilyaeremin.vkdialogs.models.Code;
 import ru.ilyaeremin.vkdialogs.models.Dialog;
 
 /**
@@ -9,7 +10,7 @@ import ru.ilyaeremin.vkdialogs.models.Dialog;
  */
 public class OnLoadFinished {
     private final List<Dialog> dialogs;
-    public final Code          code;
+    public final  Code         code;
 
     public OnLoadFinished(List<Dialog> dialogs) {
         this.dialogs = dialogs;

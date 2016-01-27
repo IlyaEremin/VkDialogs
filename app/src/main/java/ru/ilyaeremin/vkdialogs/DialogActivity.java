@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import ru.ilyaeremin.vkdialogs.models.Code;
 import ru.ilyaeremin.vkdialogs.models.Dialog;
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.Views;
@@ -47,6 +48,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         loginBtn = Views.findById(this, R.id.login_button);
         toolbar = Views.findById(this, R.id.toolbar);
         toolbar.setTitleTextAppearance(this, R.style.ToolbarTextApperarance);
+        toolbar.setOnClickListener(new FunnyListener(this));
         setSupportActionBar(toolbar);
 
         dialogsRv.setLayoutManager(new LinearLayoutManager(this));
@@ -62,11 +64,11 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         if (savedState != null) {
             restoreState(savedState);
         } else {
-            DialogManager.resetState();
+            DialogManager.getInstance().resetState();
             if (!VKSdk.isLoggedIn()) {
                 VKSdk.login(DialogActivity.this, VKScope.MESSAGES);
             } else {
-                if (DialogManager.loading) {
+                if (DialogManager.getInstance().loading) {
                     progressBar.setVisibility(View.VISIBLE);
                 } else {
                     fetchDialogs();
@@ -81,7 +83,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         if (dialogs != null) {
             createAndSetAdapter(dialogs);
         } else {
-            if (DialogManager.loading) {
+            if (DialogManager.getInstance().loading) {
                 progressBar.setVisibility(View.VISIBLE);
             }
         }
@@ -106,8 +108,12 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         EventBus.getDefault().removeStickyEvent(OnLoadFinished.class);
     }
 
+    public void onEvent(StopApp event) {
+        finish();
+    }
+
     private void showRetryButton() {
-        Toast.makeText(this, "error while loading", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.error_on_loading, Toast.LENGTH_LONG).show();
     }
 
     private void onLoadFinished(List<Dialog> dialogs) {
@@ -122,7 +128,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
         if (adapter == null) {
             progressBar.setVisibility(View.VISIBLE);
         }
-        DialogManager.loadDialogs();
+        DialogManager.getInstance().loadDialogs();
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
@@ -141,9 +147,7 @@ public class DialogActivity extends AppCompatActivity implements OnLoadMoreListe
 
             @Override
             public void onError(VKError error) {
-                Toast
-                    .makeText(DialogActivity.this, "Ошибка при авторизации, попробуйте еще раз", Toast.LENGTH_LONG)
-                    .show();
+                Toast.makeText(DialogActivity.this, R.string.error_authorization, Toast.LENGTH_LONG).show();
                 loginBtn.setVisibility(View.VISIBLE);
             }
         })) {

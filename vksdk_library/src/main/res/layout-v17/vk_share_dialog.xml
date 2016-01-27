@@ -31,7 +31,6 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/vk_share_top_image_margin"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_ab_app"
                 android:contentDescription="@string/vk_name"/>
 
             <TextView
@@ -68,7 +67,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@drawable/vk_share_send_button_background"
-                android:drawableStart="@drawable/ic_ab_done"
                 android:drawablePadding="3dp"
                 android:paddingStart="@dimen/vk_share_top_button_padding_left"
                 android:paddingEnd="@dimen/vk_share_top_button_padding_right"

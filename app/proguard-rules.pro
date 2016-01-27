@@ -15,3 +15,36 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# greenrobot eventbus
+-keepclassmembers class ** {
+    public void onEvent*(***);
+}
+
+# For using GSON @Expose annotation
+-keepattributes *Annotation*
+-keepattributes Signature
+
+# Gson specific classes
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.** { *; }
+
+# Application classes that will be serialized/deserialized over Gson
+-keep class ru.ilyaeremin.vkdialogs.models.** { *; }
+
+##---------------End: proguard configuration for Gson  ----------
+
+# Glide specific rules #
+# https://github.com/bumptech/glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+    **[] $VALUES;
+    public *;
+}
+
+#vk
+-keep class com.vk.** { *; }
+
+#debug
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+

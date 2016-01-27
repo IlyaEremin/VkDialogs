@@ -11,15 +11,15 @@ import ru.ilyaeremin.vkdialogs.models.User;
  */
 public class Users {
 
-    private static volatile Users Instance = null;
+    private static volatile Users instance = null;
 
     public static Users getInstance(){
-        Users localInstance = Instance;
+        Users localInstance = instance;
         if (localInstance == null) {
             synchronized (Dates.class) {
-                localInstance = Instance;
+                localInstance = instance;
                 if (localInstance == null) {
-                    Instance = localInstance = new Users();
+                    instance = localInstance = new Users();
                 }
             }
         }

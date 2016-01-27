@@ -1,9 +1,11 @@
-package ru.ilyaeremin.vkdialogs;
+package ru.ilyaeremin.vkdialogs.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import ru.ilyaeremin.vkdialogs.R;
 import ru.ilyaeremin.vkdialogs.models.Dialog;
 import ru.ilyaeremin.vkdialogs.utils.AndroidUtils;
 import ru.ilyaeremin.vkdialogs.utils.DLogger;
@@ -37,25 +40,27 @@ public class DialogView extends View {
     private int          messageLeft;
     private StaticLayout messageLayout;
 
-    private Dialog         dialog;
-    private AvatarDrawable avatar;
+    @Nullable private Dialog         dialog;
+    @NonNull private  AvatarDrawable avatar;
 
     public DialogView(Context context) {
         super(context);
 
-        namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-        namePaint.setTextSize(AndroidUtils.dp(17));
-        namePaint.setColor(0xff212121);
-        namePaint.setTypeface(AndroidUtils.getTypeface("fonts/rmedium.ttf"));
+        if (namePaint != null) {
+            namePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            namePaint.setTextSize(AndroidUtils.dp(17));
+            namePaint.setColor(0xff212121);
+            namePaint.setTypeface(AndroidUtils.getTypeface("fonts/rmedium.ttf"));
 
-        messagePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-        messagePaint.setTextSize(AndroidUtils.dp(15));
-        messagePaint.setColor(0xff8a8a8a);
-        messagePaint.linkColor = 0xff8a8a8a;
+            messagePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            messagePaint.setTextSize(AndroidUtils.dp(15));
+            messagePaint.setColor(0xff8a8a8a);
+            messagePaint.linkColor = 0xff8a8a8a;
 
-        timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-        timePaint.setTextSize(AndroidUtils.dp(14));
-        timePaint.setColor(0xffa6a6a6);
+            timePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+            timePaint.setTextSize(AndroidUtils.dp(14));
+            timePaint.setColor(0xffa6a6a6);
+        }
 
         avatar = new AvatarDrawable();
         setBackgroundResource(R.drawable.list_selector);
@@ -64,7 +69,7 @@ public class DialogView extends View {
         setFocusableInTouchMode(true);
     }
 
-    public void setDialog(Dialog dialog) {
+    public void setDialog(@NonNull Dialog dialog) {
         this.dialog = dialog;
         update();
     }
@@ -104,8 +109,8 @@ public class DialogView extends View {
         TextPaint currentMessagePaint = messagePaint;
 
         chatNameLeft = AndroidUtils.dp(AndroidUtils.leftBaseline);
-        timeString = dialog.getDate();
         if (dialog != null) {
+            timeString = dialog.getDate();
             messageString = dialog.getBody();
         }
 
@@ -127,10 +132,8 @@ public class DialogView extends View {
 
         int messageWidth = getMeasuredWidth() - AndroidUtils.dp(AndroidUtils.leftBaseline + 16);
         messageLeft = AndroidUtils.dp(AndroidUtils.leftBaseline);
-        if (avatar != null) {
-            avatar.setLeft(AndroidUtils.dp(16));
-            avatar.setTop(AndroidUtils.dp(9));
-        }
+        avatar.setLeft(AndroidUtils.dp(16));
+        avatar.setTop(AndroidUtils.dp(9));
 
         if (messageString == null) {
             messageString = "";
@@ -201,9 +204,7 @@ public class DialogView extends View {
         messageLayout.draw(canvas);
         canvas.restore();
 
-        if (avatar != null) {
-            avatar.draw(canvas);
-        }
+        avatar.draw(canvas);
     }
 
     public void updateImage(Bitmap bitmap, int position) {

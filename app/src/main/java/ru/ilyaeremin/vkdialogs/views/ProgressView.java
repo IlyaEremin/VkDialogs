@@ -1,4 +1,4 @@
-package ru.ilyaeremin.vkdialogs;
+package ru.ilyaeremin.vkdialogs.views;
 
 import android.content.Context;
 import android.graphics.PorterDuff;

@@ -2,7 +2,6 @@ package ru.ilyaeremin.vkdialogs.utils;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 
 /**
  * Created by Ilya Eremin on 1/26/16.
@@ -11,49 +10,11 @@ public class Threads extends Thread {
     public volatile Handler handler           = null;
     private final       Object  handlerSyncObject = new Object();
 
-    public static volatile Threads worker = new Threads("stageQueue");
+    public final static Threads worker = new Threads("worker");
 
     public Threads(final String threadName) {
         setName(threadName);
         start();
-    }
-
-    private void sendMessage(Message msg, int delay) {
-        if (handler == null) {
-            try {
-                synchronized (handlerSyncObject) {
-                    handlerSyncObject.wait();
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-
-        if (handler != null) {
-            if (delay <= 0) {
-                handler.sendMessage(msg);
-            } else {
-                handler.sendMessageDelayed(msg, delay);
-            }
-        }
-    }
-
-    public void cancelRunnable(Runnable runnable) {
-        if (handler == null) {
-            synchronized (handlerSyncObject) {
-                if (handler == null) {
-                    try {
-                        handlerSyncObject.wait();
-                    } catch (Throwable t) {
-                        t.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        if (handler != null) {
-            handler.removeCallbacks(runnable);
-        }
     }
 
     public void postRunnable(Runnable runnable) {
@@ -79,12 +40,6 @@ public class Threads extends Thread {
             } else {
                 handler.postDelayed(runnable, delay);
             }
-        }
-    }
-
-    public void cleanupQueue() {
-        if (handler != null) {
-            handler.removeCallbacksAndMessages(null);
         }
     }
 

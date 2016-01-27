@@ -2,6 +2,7 @@ package ru.ilyaeremin.vkdialogs.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import ru.ilyaeremin.vkdialogs.utils.Dates;
@@ -10,24 +11,14 @@ import ru.ilyaeremin.vkdialogs.utils.Dates;
  * Created by Ilya Eremin on 18.01.2016.
  */
 public class Dialog implements Parcelable {
-    String   title;
-    String   body;
-    int      date;
-    String[] userPics;
-    String   photo_100;
-    String   chat_active;
-    int      chat_id;
-    int      users_count;
-
-    public String[] getUserPics() {
-        return userPics;
-    }
-
-    public Dialog(String title, String body, int timeOfLastImage, long[] userIds) {
-        this.title = title;
-        this.body = body;
-        this.date = timeOfLastImage;
-    }
+    String title;
+    String body;
+    int    date;
+    @Nullable String[] userPics;
+    String photo_100;
+    String chat_active;
+    int    chat_id;
+    int    users_count;
 
     public String getTitle() {
         return title;
@@ -38,11 +29,11 @@ public class Dialog implements Parcelable {
     }
 
     public String[] getChatPhotoUrl() {
-        if(hasPhoto()) return new String[]{photo_100};
+        if (hasPhoto()) return new String[]{photo_100};
         else return userPics;
     }
 
-    public int[] getUserIds(){
+    public int[] getUserIds() {
         String[] users = chat_active.replaceAll(" ", "").split(",");
         int[] userIds = new int[users.length];
         for (int i = 0; i < users.length; i++) {
